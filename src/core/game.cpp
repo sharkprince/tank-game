@@ -1,38 +1,71 @@
-#include "core.h"
+#include "game.h"
 #include "game_states/game_states.h"
 
 Game::Game() : clock(sf::Clock()),
-               window(sf::VideoMode(200, 200), "Tank Game") {
-    state = new MenuState();
+               window(sf::VideoMode(360, 240), "Tank Game") {
+    state = nullptr;
     newState = nullptr;
 }
 
-void Game::runArcade() {
-    if (newState != nullptr) return;
-    newState = new ArcadeState();
-}
+void Game::Start() {
+    window.setKeyRepeatEnabled(false);
+    window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(true);
 
-void Game::checkForClose() {
-    sf::Event event{};
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            window.close();
-        }
-    }
-}
+    clock.restart();
 
-void Game::start() {
+    this->RunMenu();
+
     while (window.isOpen()) {
-        checkForClose();
-
         if (newState != nullptr) {
             state = newState;
             newState = nullptr;
         }
 
-        state->update(this);
-
         window.clear();
+
+        ElapsedSeconds = clock.restart().asSeconds();
+
+        sf::Event e{};
+        while (window.pollEvent(e)) {
+            if (e.type == sf::Event::Closed) {
+                this->Close();
+            }
+
+            this->state->UpdateOnEvent(e);
+        }
+
+        state->Update();
+
         window.display();
     }
+}
+
+void Game::DrawSprite(sf::Sprite *s) {
+    window.draw(*s);
+}
+
+void Game::RunArcade() {
+    if (newState != nullptr) return;
+
+    if (!areArcadeTexturesLoaded) {
+        bool isTankTextureLoaded = tankTexture.loadFromFile("src/textures/player_tank.png");
+        if (!isTankTextureLoaded) return;
+
+        bool isBulletTextureLoaded = BulletTexture.loadFromFile("src/textures/bullet.png");
+        if (!isBulletTextureLoaded) return;
+
+        areArcadeTexturesLoaded = true;
+    }
+
+    newState = new ArcadeState(this, &tankTexture);
+}
+
+void Game::RunMenu() {
+    if (newState != nullptr) return;
+    newState = new MenuState(this);
+}
+
+void Game::Close() {
+    window.close();
 }

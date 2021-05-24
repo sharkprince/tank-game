@@ -1,9 +1,9 @@
-#include "src/core/core.h"
+#include "core/game.h"
 
 int main() {
     try {
         Game* g = new Game();
-        g->start();
+        g->Start();
     } catch (...) {
         return 1;
     }
