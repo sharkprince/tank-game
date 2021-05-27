@@ -33,6 +33,8 @@ public:
 
     sf::Texture *EnemyTankTexture;
 
+    sf::Texture *ExplosionTexture;
+
 private:
     sf::RenderWindow window;
     sf::Clock clock;

@@ -10,7 +10,7 @@
 
 class Tank {
 public:
-    Tank(sf::Vector2f, sf::Texture *, sf::Texture *);
+    Tank(sf::Vector2f, sf::Texture *, sf::Texture *, sf::Texture *);
 
     sf::FloatRect GetGoUpBounds(float);
 
@@ -30,9 +30,14 @@ public:
 
     void Shoot();
 
+    void Destroy();
+
+    bool GetIsDestroyed();
+    float GetExplosionDuration();
+
     void Update(Game *);
 
-    sf::Sprite TankSprite;
+    sf::Sprite *TankSprite;
 
     std::vector<Bullet *> Bullets;
 
@@ -43,11 +48,19 @@ public:
 private:
     float lastShootDurationSeconds;
 
+    float explosionDuration;
+
+    bool isDestroyed;
+
     sf::Vector2f getGunPosition();
 
     sf::Texture *bulletTexture;
 
-    Animator *animator;
+    sf::Sprite *explosionSprite;
+
+    Animator *movingAnimator;
+
+    Animator *explosionAnimator;
 
 };
 

@@ -18,9 +18,8 @@ std::vector<BlockType> blockTypes = {
         C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
 };
 
-Level *createNewLevelOne(sf::Texture *enemyTankTexture, sf::Texture *bulletTexture, sf::Texture *cementTexture,
-                         sf::Texture *brickTexture) {
+Level *createNewLevelOne(sf::Texture *cementTexture, sf::Texture *brickTexture) {
     std::vector<std::vector<Block *>> blocks = Level::BuildBlocks(blockTypes, cementTexture, brickTexture);
 
-    return new Level(blocks, enemyTankTexture, bulletTexture, 15);
+    return new Level(blocks, 15);
 }

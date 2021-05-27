@@ -5,8 +5,8 @@
 
 ArcadeState::ArcadeState(Game *g) {
     this->game = g;
-    playerOneTank = new Tank(Level::PlayerSpawnPoints[0], game->TankTexture, g->BulletTexture);
-    level = createNewLevelOne(game->EnemyTankTexture, game->BulletTexture, game->CementTexture, game->BricksTexture);
+    playerOneTank = new Tank(Level::PlayerSpawnPoints[0], game->TankTexture, g->BulletTexture, g->ExplosionTexture);
+    level = createNewLevelOne(game->CementTexture, game->BricksTexture);
 }
 
 void ArcadeState::Update() {
@@ -21,7 +21,7 @@ void ArcadeState::Update() {
     std::vector<Tank *> playerTanks = {};
 
     if (playerOneTank != nullptr) {
-        auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite.getGlobalBounds());
+        auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite->getGlobalBounds());
         level->Tanks[position.x][position.y] = playerOneTank;
         playerTanks.push_back(playerOneTank);
     }
@@ -33,70 +33,78 @@ void ArcadeState::Update() {
 //    }
 
     for (Tank *e: level->Enemies) {
-        auto position = Level::DisplayToBlocksTankPosition(e->TankSprite.getGlobalBounds());
+        auto position = Level::DisplayToBlocksTankPosition(e->TankSprite->getGlobalBounds());
         level->Tanks[position.x][position.y] = e;
     }
 
     if (playerOneTank != nullptr) {
-        auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite.getGlobalBounds());
-        level->Tanks[position.x][position.y] = nullptr;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            auto bounds = playerOneTank->GetGoRightBounds(game->ElapsedSeconds);
-            if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
-                playerOneTank->GoRight(game->ElapsedSeconds);
+        if (playerOneTank->GetIsDestroyed()) {
+            playerOneTank->Update(game);
+            if (playerOneTank->GetExplosionDuration() >= 1.5f) {
+                playerOneTank = nullptr;
             }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-            auto bounds = playerOneTank->GetGoDownBounds(game->ElapsedSeconds);
-            if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
-                playerOneTank->GoDown(game->ElapsedSeconds);
+        } else {
+            auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite->getGlobalBounds());
+            level->Tanks[position.x][position.y] = nullptr;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                auto bounds = playerOneTank->GetGoRightBounds(game->ElapsedSeconds);
+                if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
+                    playerOneTank->GoRight(game->ElapsedSeconds);
+                }
             }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            auto bounds = playerOneTank->GetGoLeftBounds(game->ElapsedSeconds);
-            if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
-                playerOneTank->GoLeft(game->ElapsedSeconds);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                auto bounds = playerOneTank->GetGoDownBounds(game->ElapsedSeconds);
+                if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
+                    playerOneTank->GoDown(game->ElapsedSeconds);
+                }
             }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            auto bounds = playerOneTank->GetGoUpBounds(game->ElapsedSeconds);
-            if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
-                playerOneTank->GoUp(game->ElapsedSeconds);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                auto bounds = playerOneTank->GetGoLeftBounds(game->ElapsedSeconds);
+                if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
+                    playerOneTank->GoLeft(game->ElapsedSeconds);
+                }
             }
-        }
-        level->Tanks[position.x][position.y] = playerOneTank;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                auto bounds = playerOneTank->GetGoUpBounds(game->ElapsedSeconds);
+                if (level->AreBoundsIntersectBlocks(bounds).empty() && level->AreBoundsIntersectTanks(bounds).empty()) {
+                    playerOneTank->GoUp(game->ElapsedSeconds);
+                }
+            }
+            level->Tanks[position.x][position.y] = playerOneTank;
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-            playerOneTank->Shoot();
-        }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+                playerOneTank->Shoot();
+            }
 
-        for (int i = 0; i < playerOneTank->Bullets.size(); i++) {
-            Bullet *b = playerOneTank->Bullets[i];
-            sf::FloatRect bounds = b->Sprite.getGlobalBounds();
+            for (int i = 0; i < playerOneTank->Bullets.size(); i++) {
+                Bullet *b = playerOneTank->Bullets[i];
+                sf::FloatRect bounds = b->Sprite.getGlobalBounds();
 
-            bool isNeedToDeleteBullet = false;
+                bool isNeedToDeleteBullet = false;
 
-            for (int j = 0; j < level->Enemies.size(); j++) {
-                if (bounds.intersects(level->Enemies[j]->TankSprite.getGlobalBounds())) {
-                    level->Enemies.erase(level->Enemies.begin() + j);
+                for (int j = 0; j < level->Enemies.size(); j++) {
+                    if (bounds.intersects(level->Enemies[j]->TankSprite->getGlobalBounds())) {
+                        level->Enemies[j]->Destroy();
+                        isNeedToDeleteBullet = true;
+                    }
+                }
+
+                std::vector<Block *> hitBlocks = level->AreBoundsIntersectBlocks(bounds);
+                if (!hitBlocks.empty()) {
+                    for (Block *bb:hitBlocks) {
+                        bb->Hit(ReverseRotation(b->Sprite.getRotation()));
+                    }
                     isNeedToDeleteBullet = true;
                 }
-            }
 
-            std::vector<Block *> hitBlocks = level->AreBoundsIntersectBlocks(bounds);
-            if (!hitBlocks.empty()) {
-                for (Block *bb:hitBlocks) {
-                    bb->Hit(ReverseRotation(b->Sprite.getRotation()));
+                if (isNeedToDeleteBullet) {
+                    playerOneTank->Bullets.erase(playerOneTank->Bullets.begin() + i);
                 }
-                isNeedToDeleteBullet = true;
             }
 
-            if (isNeedToDeleteBullet) {
-                playerOneTank->Bullets.erase(playerOneTank->Bullets.begin() + i);
-            }
+            playerOneTank->Update(game);
         }
 
-        playerOneTank->Update(game);
     }
 
     level->Update(game);
@@ -105,8 +113,8 @@ void ArcadeState::Update() {
         for (int i = 0; i < e->Bullets.size(); ++i) {
             sf::FloatRect bounds = e->Bullets[i]->Sprite.getGlobalBounds();
             if (playerOneTank != nullptr) {
-                if (bounds.intersects(playerOneTank->TankSprite.getGlobalBounds())) {
-                    playerOneTank = nullptr;
+                if (bounds.intersects(playerOneTank->TankSprite->getGlobalBounds())) {
+                    playerOneTank->Destroy();
                 }
             }
         }
@@ -118,9 +126,9 @@ void ArcadeState::Update() {
             sf::FloatRect rect = sf::FloatRect(sp.x - 12, sp.y - 12, 24, 24);
             auto res = level->AreBoundsIntersectTanks(rect);
             if (res.empty()) {
-                playerOneTank = new Tank(sp, game->TankTexture, game->BulletTexture);
+                playerOneTank = new Tank(sp, game->TankTexture, game->BulletTexture, game->ExplosionTexture);
 
-                auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite.getGlobalBounds());
+                auto position = Level::DisplayToBlocksTankPosition(playerOneTank->TankSprite->getGlobalBounds());
                 level->Tanks[position.x][position.y] = playerOneTank;
 
                 break;

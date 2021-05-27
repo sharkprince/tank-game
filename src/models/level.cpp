@@ -35,12 +35,9 @@ sf::Vector2i Level::DisplayToBlocksTankPosition(sf::FloatRect position) {
     return sf::Vector2i(x, y);
 }
 
-Level::Level(std::vector<std::vector<Block *>> blocks, sf::Texture *enemyTankTexture, sf::Texture *bulletTexture,
-             int enemiesCount) {
+Level::Level(std::vector<std::vector<Block *>> blocks, int enemiesCount) {
     this->blocks = std::move(blocks);
     EnemiesToKillCount = enemiesCount;
-    this->enemyTankTexture = enemyTankTexture;
-    this->bulletTexture = bulletTexture;
 }
 
 void Level::Update(Game *g) {
@@ -52,10 +49,18 @@ void Level::Update(Game *g) {
         }
     }
 
-    for (Tank *e: Enemies) {
+    for (int i = 0; i < Enemies.size(); i++) {
+        Tank *e = Enemies[i];
+        if (e->GetIsDestroyed()) {
+            e->Update(g);
+            if (e->GetExplosionDuration() >= 1.5f) {
+                Enemies.erase(Enemies.begin() + i);
+            }
+            continue;
+        }
         e->ElapsedRandMove += g->ElapsedSeconds;
         if (e->ElapsedRandMove < e->RandMoveLength) {
-            auto position = DisplayToBlocksTankPosition(e->TankSprite.getGlobalBounds());
+            auto position = DisplayToBlocksTankPosition(e->TankSprite->getGlobalBounds());
             Tanks[position.x][position.y] = nullptr;
             sf::FloatRect leftBounds = e->GetGoLeftBounds(g->ElapsedSeconds);
             sf::FloatRect upBounds = e->GetGoUpBounds(g->ElapsedSeconds);
@@ -91,8 +96,8 @@ void Level::Update(Game *g) {
             e->RandMoveLength = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8f - 0.5f)));;
         }
 
-        for (int i = 0; i < e->Bullets.size(); i++) {
-            Bullet *b = e->Bullets[i];
+        for (int j = 0; j < e->Bullets.size(); j++) {
+            Bullet *b = e->Bullets[j];
             sf::FloatRect bounds = b->Sprite.getGlobalBounds();
 
             bool isNeedToDeleteBullet = false;
@@ -106,7 +111,7 @@ void Level::Update(Game *g) {
             }
 
             if (isNeedToDeleteBullet) {
-                e->Bullets.erase(e->Bullets.begin() + i);
+                e->Bullets.erase(e->Bullets.begin() + j);
             }
         }
 
@@ -130,10 +135,10 @@ void Level::Update(Game *g) {
             sf::FloatRect rect = sf::FloatRect(sp.x - 12, sp.y - 12, 24, 24);
             auto res = AreBoundsIntersectTanks(rect);
             if (res.empty()) {
-                Tank *newEnemy = new Tank(sp, enemyTankTexture, bulletTexture);
+                Tank *newEnemy = new Tank(sp, g->EnemyTankTexture, g->BulletTexture, g->ExplosionTexture);
                 Enemies.push_back(newEnemy);
 
-                auto position = DisplayToBlocksTankPosition(newEnemy->TankSprite.getGlobalBounds());
+                auto position = DisplayToBlocksTankPosition(newEnemy->TankSprite->getGlobalBounds());
                 Tanks[position.x][position.y] = newEnemy;
 
                 isSpawned = true;
@@ -253,7 +258,7 @@ Tank *Level::AreBoundsIntersectTank(sf::FloatRect bounds, sf::Vector2i tankPosit
         return nullptr;
     }
 
-    if (bounds.intersects(Tanks[tankPosition.x][tankPosition.y]->TankSprite.getGlobalBounds())) {
+    if (bounds.intersects(Tanks[tankPosition.x][tankPosition.y]->TankSprite->getGlobalBounds())) {
         return Tanks[tankPosition.x][tankPosition.y];
     }
 

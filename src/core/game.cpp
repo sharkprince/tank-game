@@ -13,6 +13,7 @@ Game::Game() : clock(sf::Clock()),
     BricksTexture = new sf::Texture();
     CementTexture = new sf::Texture();
     EnemyTankTexture = new sf::Texture();
+    ExplosionTexture = new sf::Texture();
 }
 
 void Game::Start() {
@@ -68,6 +69,9 @@ void Game::RunArcade() {
 
         bool isEnemyTankTextureLoaded = EnemyTankTexture->loadFromFile("src/textures/enemy_tank.png");
         if (!isEnemyTankTextureLoaded) return;
+
+        bool isExplosionTextureLoaded = ExplosionTexture->loadFromFile("src/textures/explosion.png");
+        if (!isExplosionTextureLoaded) return;
 
         areArcadeTexturesLoaded = true;
     }

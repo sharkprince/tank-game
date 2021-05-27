@@ -28,8 +28,7 @@ public:
     static std::vector<std::vector<Block *>>
     BuildBlocks(std::vector<BlockType> types, sf::Texture *cementTexture, sf::Texture *brickTexture);
 
-    Level(std::vector<std::vector<Block *>>, sf::Texture *enemyTankTexture, sf::Texture *bulletTexture,
-          int enemiesCount);
+    Level(std::vector<std::vector<Block *>>, int enemiesCount);
 
     void Update(Game *g);
 
@@ -50,10 +49,6 @@ public:
     constexpr static int LEVEL_HEIGHT_IN_BLOCKS = 15;
 private:
     std::vector<std::vector<Block *>> blocks;
-
-    sf::Texture *enemyTankTexture;
-
-    sf::Texture *bulletTexture;
 
     constexpr static float POSITION_X = 140.f;
     constexpr static float POSITION_Y = 0.f;
