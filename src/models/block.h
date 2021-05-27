@@ -7,11 +7,14 @@
 
 class Block {
 public:
-    Block(sf::Texture *texture, sf::Vector2f position, bool isBreakable);
+    Block(sf::Texture *texture, sf::Vector2f position, bool isBreakable, bool isSoft, bool isDeep);
 
     void Update(Game *g);
 
     bool Hit(float rotation);
+
+    bool GetIsSoft();
+    bool GetIsDeep();
 
     sf::Sprite *Sprite;
 
@@ -21,6 +24,8 @@ public:
 
 private:
     bool isBreakable;
+    bool isSoft;
+    bool isDeep;
     sf::Texture texture;
 };
 

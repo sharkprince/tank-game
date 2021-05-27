@@ -155,7 +155,8 @@ void Level::Update(Game *g) {
 
 
 std::vector<std::vector<Block *>>
-Level::BuildBlocks(std::vector<BlockType> types, sf::Texture *cementTexture, sf::Texture *brickTexture) {
+Level::BuildBlocks(std::vector<BlockType> types, sf::Texture *waterTexture, sf::Texture *grassTexture,
+                   sf::Texture *cementTexture, sf::Texture *brickTexture) {
     std::vector<std::vector<Block *>> blocks;
     for (int i = 0; i < LEVEL_WIDTH_IN_BLOCKS; i++) {
         blocks.emplace_back();
@@ -171,10 +172,20 @@ Level::BuildBlocks(std::vector<BlockType> types, sf::Texture *cementTexture, sf:
         int y = i / LEVEL_WIDTH_IN_BLOCKS;
         switch (bt) {
             case B:
-                blocks[x][y] = new Block(brickTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), true);
+                blocks[x][y] = new Block(brickTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), true, false,
+                                         false);
                 break;
             case C:
-                blocks[x][y] = new Block(cementTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), false);
+                blocks[x][y] = new Block(cementTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), false,
+                                         false, false);
+                break;
+            case G:
+                blocks[x][y] = new Block(grassTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), false, true,
+                                         false);
+                break;
+            case W:
+                blocks[x][y] = new Block(waterTexture, Level::BlocksToDisplayPosition(sf::Vector2i(x, y)), false, false,
+                                         true);
                 break;
         }
     }
@@ -183,7 +194,8 @@ Level::BuildBlocks(std::vector<BlockType> types, sf::Texture *cementTexture, sf:
 
 Block *Level::AreBoundsIntersectBlock(sf::FloatRect bounds, sf::Vector2i blockPosition) {
     if (blockPosition.x < 0 || blockPosition.y < 0 || blockPosition.x >= LEVEL_WIDTH_IN_BLOCKS ||
-        blockPosition.y >= LEVEL_HEIGHT_IN_BLOCKS || blocks[blockPosition.x][blockPosition.y] == nullptr) {
+        blockPosition.y >= LEVEL_HEIGHT_IN_BLOCKS || blocks[blockPosition.x][blockPosition.y] == nullptr ||
+        blocks[blockPosition.x][blockPosition.y]->GetIsSoft()) {
         return nullptr;
     }
 

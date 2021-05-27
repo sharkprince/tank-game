@@ -26,7 +26,8 @@ public:
     static sf::Vector2i DisplayToBlocksTankPosition(sf::FloatRect position);
 
     static std::vector<std::vector<Block *>>
-    BuildBlocks(std::vector<BlockType> types, sf::Texture *cementTexture, sf::Texture *brickTexture);
+    BuildBlocks(std::vector<BlockType> types, sf::Texture *waterTexture, sf::Texture *grassTexture,
+                sf::Texture *cementTexture, sf::Texture *brickTexture);
 
     Level(std::vector<std::vector<Block *>>, int enemiesCount);
 

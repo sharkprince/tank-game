@@ -1,7 +1,7 @@
 #include "../game.h"
 #include "game_states.h"
 #include "../../const/rotation.h"
-#include "../../levels/level_one.h"
+#include "../../levels/levels.h"
 
 ArcadeState::ArcadeState(Game *g, int playersCount) {
     this->game = g;
@@ -14,7 +14,7 @@ ArcadeState::ArcadeState(Game *g, int playersCount) {
     } else {
         playerTwoTank = nullptr;
     }
-    level = createNewLevelOne(game->CementTexture, game->BricksTexture);
+    level = createNewLevelOne(game->WaterTexture, game->GrassTexture, game->CementTexture, game->BricksTexture);
 }
 
 void ArcadeState::Update() {
@@ -100,9 +100,12 @@ void ArcadeState::Update() {
                 std::vector<Block *> hitBlocks = level->AreBoundsIntersectBlocks(bounds);
                 if (!hitBlocks.empty()) {
                     for (Block *bb:hitBlocks) {
+                        if (bb->GetIsDeep()) {
+                            continue;
+                        }
                         bb->Hit(ReverseRotation(b->Sprite.getRotation()));
+                        isNeedToDeleteBullet = true;
                     }
-                    isNeedToDeleteBullet = true;
                 }
 
                 if (isNeedToDeleteBullet) {
@@ -170,9 +173,12 @@ void ArcadeState::Update() {
                 std::vector<Block *> hitBlocks = level->AreBoundsIntersectBlocks(bounds);
                 if (!hitBlocks.empty()) {
                     for (Block *bb:hitBlocks) {
+                        if (bb->GetIsDeep()) {
+                            continue;;
+                        }
                         bb->Hit(ReverseRotation(b->Sprite.getRotation()));
+                        isNeedToDeleteBullet = true;
                     }
-                    isNeedToDeleteBullet = true;
                 }
 
                 if (isNeedToDeleteBullet) {

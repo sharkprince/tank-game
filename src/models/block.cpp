@@ -1,14 +1,16 @@
 #include "block.h"
 #include "../const/rotation.h"
 
-Block::Block(sf::Texture *texture, sf::Vector2f position, bool isBreakable) {
+Block::Block(sf::Texture *texture, sf::Vector2f position, bool isBreakable, bool isSoft, bool isDeep) {
     Sprite = new sf::Sprite();
     Sprite->setTexture(*texture);
     Sprite->setPosition(position.x, position.y);
     Sprite->setTextureRect(sf::IntRect(0, 0, BLOCK_WIDTH_PIXELS, BLOCK_HEIGHT_PIXELS));
     Sprite->setRotation(0);
 
+    this->isSoft = isSoft;
     this->isBreakable = isBreakable;
+    this->isDeep = isDeep;
 }
 
 void Block::Update(Game *g) {
@@ -64,4 +66,12 @@ bool Block::Hit(float rotation) {
     }
 
     return false;
+}
+
+bool Block::GetIsSoft() {
+    return isSoft;
+}
+
+bool Block::GetIsDeep() {
+    return isDeep;
 }

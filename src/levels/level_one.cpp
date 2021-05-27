@@ -1,4 +1,4 @@
-#include "level_one.h"
+#include "levels.h"
 
 std::vector<BlockType> blockTypes = {
         C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
@@ -18,8 +18,10 @@ std::vector<BlockType> blockTypes = {
         C, C, C, C, C, C, C, C, C, C, C, C, C, C, C,
 };
 
-Level *createNewLevelOne(sf::Texture *cementTexture, sf::Texture *brickTexture) {
-    std::vector<std::vector<Block *>> blocks = Level::BuildBlocks(blockTypes, cementTexture, brickTexture);
+Level *createNewLevelOne(sf::Texture *waterTexture, sf::Texture *grassTexture, sf::Texture *cementTexture,
+                         sf::Texture *brickTexture) {
+    std::vector<std::vector<Block *>> blocks = Level::BuildBlocks(blockTypes, waterTexture, grassTexture, cementTexture,
+                                                                  brickTexture);
 
     return new Level(blocks, 15);
 }
