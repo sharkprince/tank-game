@@ -21,7 +21,13 @@ public:
 
     float ElapsedSeconds;
 
-    sf::Texture BulletTexture;
+    sf::Texture *TankTexture;
+
+    sf::Texture *BulletTexture;
+
+    sf::Texture *BricksTexture;
+
+    sf::Texture *CementTexture;
 
 private:
     sf::RenderWindow window;
@@ -31,7 +37,6 @@ private:
     GameState *newState;
 
     bool areArcadeTexturesLoaded;
-    sf::Texture tankTexture;
 };
 
 class GameState {

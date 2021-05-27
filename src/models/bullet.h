@@ -12,8 +12,9 @@ public:
 
     void Update(Game *);
 
+    sf::Sprite Sprite;
+
 private:
-    sf::Sprite sprite;
 };
 
 

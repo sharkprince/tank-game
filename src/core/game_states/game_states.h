@@ -2,6 +2,8 @@
 #define TANK_GAME_GAME_STATES_H
 
 #include "../../models/tank.h"
+#include "../../models/block.h"
+#include "../../models/level.h"
 
 class MenuState : public GameState {
 public:
@@ -14,7 +16,7 @@ public:
 
 class ArcadeState : public GameState {
 public:
-    ArcadeState(Game *, sf::Texture *);
+    ArcadeState(Game *);
 
     void Update() override;
 
@@ -22,6 +24,7 @@ public:
 
 private:
     Tank *playerOneTank;
+    Level *level;
 };
 
 #endif //TANK_GAME_GAME_STATES_H

@@ -6,14 +6,14 @@ const float MOVE_SPEED = 50.f;
 const float SHOOT_INTERVAL_SECONDS = 1.f;
 const float MOVE_ANIMATION_FRAME_DURATION_SECONDS = 0.05f;
 
-const float GUN_LENGTH = 20;
+const float GUN_LENGTH = 12;
 
-Tank::Tank(sf::Texture *tankTexture, sf::Texture *bulletTexture) {
+Tank::Tank(sf::Vector2f position, sf::Texture *tankTexture, sf::Texture *bulletTexture) {
     TankSprite = sf::Sprite();
     TankSprite.setTexture(*tankTexture);
-    TankSprite.setTextureRect(sf::IntRect(0, 0, 24, 31));
-    TankSprite.setPosition(180, 120);
-    TankSprite.setOrigin(sf::Vector2(12.f, 19.5f));
+    TankSprite.setTextureRect(sf::IntRect(0, 0, 24, 24));
+    TankSprite.setPosition(position.x, position.y);
+    TankSprite.setOrigin(sf::Vector2(12.f, 12.f));
 
     this->bulletTexture = bulletTexture;
 
@@ -22,10 +22,22 @@ Tank::Tank(sf::Texture *tankTexture, sf::Texture *bulletTexture) {
     animator = new Animator(MOVE_ANIMATION_FRAME_DURATION_SECONDS, &TankSprite);
 }
 
+sf::FloatRect Tank::GetGoUpBounds(float elapsedSeconds) {
+    sf::FloatRect bounds = TankSprite.getGlobalBounds();
+    bounds.top = bounds.top - (MOVE_SPEED * elapsedSeconds);
+    return bounds;
+}
+
 void Tank::GoUp(float elapsedSeconds) {
     this->animator->Update(elapsedSeconds);
     TankSprite.move(sf::Vector2f(0.f, -MOVE_SPEED * elapsedSeconds));
     TankSprite.setRotation(UP_ROTATION);
+}
+
+sf::FloatRect Tank::GetGoRightBounds(float elapsedSeconds) {
+    sf::FloatRect bounds = TankSprite.getGlobalBounds();
+    bounds.left = bounds.left + (MOVE_SPEED * elapsedSeconds);
+    return bounds;
 }
 
 void Tank::GoRight(float elapsedSeconds) {
@@ -34,10 +46,22 @@ void Tank::GoRight(float elapsedSeconds) {
     TankSprite.setRotation(RIGHT_ROTATION);
 }
 
+sf::FloatRect Tank::GetGoDownBounds(float elapsedSeconds) {
+    sf::FloatRect bounds = TankSprite.getGlobalBounds();
+    bounds.top = bounds.top + (MOVE_SPEED * elapsedSeconds);
+    return bounds;
+}
+
 void Tank::GoDown(float elapsedSeconds) {
     this->animator->Update(elapsedSeconds);
     TankSprite.move(sf::Vector2f(0, MOVE_SPEED * elapsedSeconds));
     TankSprite.setRotation(DOWN_ROTATION);
+}
+
+sf::FloatRect Tank::GetGoLeftBounds(float elapsedSeconds) {
+    sf::FloatRect bounds = TankSprite.getGlobalBounds();
+    bounds.left = bounds.left - (MOVE_SPEED * elapsedSeconds);
+    return bounds;
 }
 
 void Tank::GoLeft(float elapsedSeconds) {
@@ -47,9 +71,11 @@ void Tank::GoLeft(float elapsedSeconds) {
 }
 
 void Tank::Update(Game *g) {
+    lastShootDurationSeconds += g->ElapsedSeconds;
+
     g->DrawSprite(&TankSprite);
 
-    for (Bullet *b:bullets) {
+    for (Bullet *b:Bullets) {
         b->Update(g);
     }
 }
@@ -70,13 +96,12 @@ sf::Vector2f Tank::getGunPosition() {
     return sf::Vector2f(tankPosition.x - GUN_LENGTH, tankPosition.y);
 }
 
-void Tank::Shoot(float elapsedSeconds) {
-    lastShootDurationSeconds += elapsedSeconds;
+void Tank::Shoot() {
     if (lastShootDurationSeconds < SHOOT_INTERVAL_SECONDS) return;
 
     lastShootDurationSeconds = 0;
 
     sf::Vector2f gunPosition = getGunPosition();
     auto newBullet = new Bullet(bulletTexture, gunPosition.x, gunPosition.y, TankSprite.getRotation());
-    bullets.push_back(newBullet);
+    Bullets.push_back(newBullet);
 }

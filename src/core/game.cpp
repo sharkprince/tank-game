@@ -2,9 +2,13 @@
 #include "game_states/game_states.h"
 
 Game::Game() : clock(sf::Clock()),
-               window(sf::VideoMode(360, 240), "Tank Game") {
+               window(sf::VideoMode(640, 360), "Tank Game") {
     state = nullptr;
     newState = nullptr;
+    TankTexture = new sf::Texture();
+    BulletTexture = new sf::Texture();
+    BricksTexture = new sf::Texture();
+    CementTexture = new sf::Texture();
 }
 
 void Game::Start() {
@@ -49,16 +53,22 @@ void Game::RunArcade() {
     if (newState != nullptr) return;
 
     if (!areArcadeTexturesLoaded) {
-        bool isTankTextureLoaded = tankTexture.loadFromFile("src/textures/player_tank.png");
+        bool isTankTextureLoaded = TankTexture->loadFromFile("src/textures/player_tank.png");
         if (!isTankTextureLoaded) return;
 
-        bool isBulletTextureLoaded = BulletTexture.loadFromFile("src/textures/bullet.png");
+        bool isBulletTextureLoaded = BulletTexture->loadFromFile("src/textures/bullet.png");
         if (!isBulletTextureLoaded) return;
+
+        bool isBricksTextureLoaded = BricksTexture->loadFromFile("src/textures/bricks.png");
+        if (!isBricksTextureLoaded) return;
+
+        bool isCementTextureLoaded = CementTexture->loadFromFile("src/textures/cement.png");
+        if (!isCementTextureLoaded) return;
 
         areArcadeTexturesLoaded = true;
     }
 
-    newState = new ArcadeState(this, &tankTexture);
+    newState = new ArcadeState(this);
 }
 
 void Game::RunMenu() {

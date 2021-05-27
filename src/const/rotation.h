@@ -7,5 +7,7 @@ const float RIGHT_ROTATION = 90.f;
 const float DOWN_ROTATION = 180.f;
 const float LEFT_ROTATION = 270.f;
 
+float ReverseRotation(float rotation);
+
 
 #endif //TANK_GAME_ROTATION_H

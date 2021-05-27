@@ -10,21 +10,31 @@
 
 class Tank {
 public:
-    Tank(sf::Texture *, sf::Texture *);
+    Tank(sf::Vector2f, sf::Texture *, sf::Texture *);
+
+    sf::FloatRect GetGoUpBounds(float);
 
     void GoUp(float);
 
+    sf::FloatRect GetGoRightBounds(float);
+
     void GoRight(float);
+
+    sf::FloatRect GetGoDownBounds(float);
 
     void GoDown(float);
 
+    sf::FloatRect GetGoLeftBounds(float);
+
     void GoLeft(float);
 
-    void Shoot(float);
+    void Shoot();
 
     void Update(Game *);
 
     sf::Sprite TankSprite;
+
+    std::vector<Bullet *> Bullets;
 
 private:
     float lastShootDurationSeconds;
@@ -35,7 +45,6 @@ private:
 
     Animator *animator;
 
-    std::vector<Bullet *> bullets;
 };
 
 
