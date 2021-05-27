@@ -15,6 +15,13 @@ Game::Game() : clock(sf::Clock()),
     CementTexture = new sf::Texture();
     EnemyTankTexture = new sf::Texture();
     ExplosionTexture = new sf::Texture();
+    GameOverTexture = new sf::Texture();
+    GrassTexture = new sf::Texture();
+    HealthTexture = new sf::Texture();
+    LevelOneTexture = new sf::Texture();
+    LevelTwoTexture = new sf::Texture();
+    LevelThreeTexture = new sf::Texture();
+    WaterTexture = new sf::Texture();
 }
 
 void Game::Start() {
@@ -76,6 +83,27 @@ void Game::RunArcade(int playersCount) {
 
         bool isExplosionTextureLoaded = ExplosionTexture->loadFromFile("src/textures/explosion.png");
         if (!isExplosionTextureLoaded) return;
+
+        bool isGameOverTextureLoaded = GameOverTexture->loadFromFile("src/textures/game_over.png");
+        if (!isGameOverTextureLoaded) return;
+
+        bool isGrassTextureLoaded = GrassTexture->loadFromFile("src/textures/grass.png");
+        if (!isGrassTextureLoaded) return;
+
+        bool isHealthTextureLoaded = HealthTexture->loadFromFile("src/textures/health.png");
+        if (!isHealthTextureLoaded) return;
+
+        bool isLevelOneTextureLoaded = LevelOneTexture->loadFromFile("src/textures/level_1.png");
+        if (!isLevelOneTextureLoaded) return;
+
+        bool isLevelTwoTextureLoaded = LevelTwoTexture->loadFromFile("src/textures/level_2.png");
+        if (!isLevelTwoTextureLoaded) return;
+
+        bool isLevelThreeTextureLoaded = LevelThreeTexture->loadFromFile("src/textures/level_3.png");
+        if (!isLevelThreeTextureLoaded) return;
+
+        bool isWaterTextureLoaded = WaterTexture->loadFromFile("src/textures/water.png");
+        if (!isWaterTextureLoaded) return;
 
         areArcadeTexturesLoaded = true;
     }

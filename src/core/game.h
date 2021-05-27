@@ -37,6 +37,20 @@ public:
 
     sf::Texture *ExplosionTexture;
 
+    sf::Texture *GameOverTexture;
+
+    sf::Texture *GrassTexture;
+
+    sf::Texture *HealthTexture;
+
+    sf::Texture *LevelOneTexture;
+
+    sf::Texture *LevelTwoTexture;
+
+    sf::Texture *LevelThreeTexture;
+
+    sf::Texture *WaterTexture;
+
 private:
     sf::RenderWindow window;
     sf::Clock clock;
