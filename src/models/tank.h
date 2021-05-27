@@ -36,6 +36,10 @@ public:
 
     std::vector<Bullet *> Bullets;
 
+    int RandMove;
+    float RandMoveLength;
+    float ElapsedRandMove;
+
 private:
     float lastShootDurationSeconds;
 

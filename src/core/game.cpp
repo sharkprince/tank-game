@@ -5,10 +5,14 @@ Game::Game() : clock(sf::Clock()),
                window(sf::VideoMode(640, 360), "Tank Game") {
     state = nullptr;
     newState = nullptr;
+
+    MenuTexture = new sf::Texture();
     TankTexture = new sf::Texture();
+
     BulletTexture = new sf::Texture();
     BricksTexture = new sf::Texture();
     CementTexture = new sf::Texture();
+    EnemyTankTexture = new sf::Texture();
 }
 
 void Game::Start() {
@@ -53,9 +57,6 @@ void Game::RunArcade() {
     if (newState != nullptr) return;
 
     if (!areArcadeTexturesLoaded) {
-        bool isTankTextureLoaded = TankTexture->loadFromFile("src/textures/player_tank.png");
-        if (!isTankTextureLoaded) return;
-
         bool isBulletTextureLoaded = BulletTexture->loadFromFile("src/textures/bullet.png");
         if (!isBulletTextureLoaded) return;
 
@@ -65,6 +66,9 @@ void Game::RunArcade() {
         bool isCementTextureLoaded = CementTexture->loadFromFile("src/textures/cement.png");
         if (!isCementTextureLoaded) return;
 
+        bool isEnemyTankTextureLoaded = EnemyTankTexture->loadFromFile("src/textures/enemy_tank.png");
+        if (!isEnemyTankTextureLoaded) return;
+
         areArcadeTexturesLoaded = true;
     }
 
@@ -73,6 +77,17 @@ void Game::RunArcade() {
 
 void Game::RunMenu() {
     if (newState != nullptr) return;
+
+    if (!areMenuTexturesLoaded) {
+        bool isTankTextureLoaded = TankTexture->loadFromFile("src/textures/player_tank.png");
+        if (!isTankTextureLoaded) return;
+
+        bool isMenuTextureLoaded = MenuTexture->loadFromFile("src/textures/menu.png");
+        if (!isMenuTextureLoaded) return;
+
+        areMenuTexturesLoaded = true;
+    }
+
     newState = new MenuState(this);
 }
 

@@ -4,7 +4,7 @@
 const float MOVE_SPEED = 50.f;
 
 const float SHOOT_INTERVAL_SECONDS = 1.f;
-const float MOVE_ANIMATION_FRAME_DURATION_SECONDS = 0.05f;
+const float MOVE_ANIMATION_FRAME_DURATION_SECONDS = 0.1f;
 
 const float GUN_LENGTH = 12;
 
@@ -20,6 +20,8 @@ Tank::Tank(sf::Vector2f position, sf::Texture *tankTexture, sf::Texture *bulletT
     lastShootDurationSeconds = SHOOT_INTERVAL_SECONDS;
 
     animator = new Animator(MOVE_ANIMATION_FRAME_DURATION_SECONDS, &TankSprite);
+
+    RandMove = -1;
 }
 
 sf::FloatRect Tank::GetGoUpBounds(float elapsedSeconds) {

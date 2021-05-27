@@ -4,6 +4,7 @@
 #include "../models/level.h"
 #include "../models/block.h"
 
-Level *createNewLevelOne(sf::Texture *cementTexture, sf::Texture *brickTexture);
+Level *createNewLevelOne(sf::Texture *enemyTankTexture, sf::Texture *bulletTexture, sf::Texture *cementTexture,
+                         sf::Texture *brickTexture);
 
 #endif

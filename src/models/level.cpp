@@ -1,7 +1,20 @@
 #include "level.h"
+#include "../const/rotation.h"
 
 #include <utility>
 #include <cmath>
+
+const std::vector<sf::Vector2f> Level::PlayerSpawnPoints = {
+        sf::Vector2f(463.f, 323.f),
+        sf::Vector2f(176.f, 323.f),
+        sf::Vector2f(320.f, 323.f)
+};
+
+const std::vector<sf::Vector2f> Level::EnemySpawnPoints = {
+        sf::Vector2f(463.f, 36.f),
+        sf::Vector2f(176.f, 36.f),
+        sf::Vector2f(320.f, 36.f)
+};
 
 sf::Vector2f Level::BlocksToDisplayPosition(sf::Vector2i position) {
     return sf::Vector2f(
@@ -16,18 +29,123 @@ sf::Vector2i Level::DisplayToBlocksPosition(sf::Vector2f position) {
     return sf::Vector2i(x, y);
 }
 
-Level::Level(std::vector<std::vector<Block *>> blocks) {
+sf::Vector2i Level::DisplayToBlocksTankPosition(sf::FloatRect position) {
+    int x = std::lrint((position.left + 24 - POSITION_X) / Block::BLOCK_WIDTH_PIXELS);
+    int y = std::lrint((position.top + 24 - POSITION_Y) / Block::BLOCK_HEIGHT_PIXELS);
+    return sf::Vector2i(x, y);
+}
+
+Level::Level(std::vector<std::vector<Block *>> blocks, sf::Texture *enemyTankTexture, sf::Texture *bulletTexture,
+             int enemiesCount) {
     this->blocks = std::move(blocks);
+    EnemiesToKillCount = enemiesCount;
+    this->enemyTankTexture = enemyTankTexture;
+    this->bulletTexture = bulletTexture;
 }
 
 void Level::Update(Game *g) {
-    for (std::vector<Block *> b:blocks) {
+    for (const std::vector<Block *> &b:blocks) {
         for (Block *bb: b) {
             if (bb != nullptr) {
                 bb->Update(g);
             }
         }
     }
+
+    for (Tank *e: Enemies) {
+        e->ElapsedRandMove += g->ElapsedSeconds;
+        if (e->ElapsedRandMove < e->RandMoveLength) {
+            auto position = DisplayToBlocksTankPosition(e->TankSprite.getGlobalBounds());
+            Tanks[position.x][position.y] = nullptr;
+            sf::FloatRect leftBounds = e->GetGoLeftBounds(g->ElapsedSeconds);
+            sf::FloatRect upBounds = e->GetGoUpBounds(g->ElapsedSeconds);
+            sf::FloatRect rightBounds = e->GetGoRightBounds(g->ElapsedSeconds);
+            sf::FloatRect downBounds = e->GetGoDownBounds(g->ElapsedSeconds);
+            switch (e->RandMove) {
+                case 1:
+                    if (AreBoundsIntersectBlocks(rightBounds).empty() && AreBoundsIntersectTanks(rightBounds).empty()) {
+                        e->GoRight(g->ElapsedSeconds);
+                    }
+                    break;
+                case 2:
+                    if (AreBoundsIntersectBlocks(upBounds).empty() && AreBoundsIntersectTanks(upBounds).empty()) {
+                        e->GoUp(g->ElapsedSeconds);
+                    }
+                    break;
+                case 3:
+                    if (AreBoundsIntersectBlocks(downBounds).empty() && AreBoundsIntersectTanks(downBounds).empty()) {
+                        e->GoDown(g->ElapsedSeconds);
+                    }
+                    break;
+                case 4:
+                    if (AreBoundsIntersectBlocks(leftBounds).empty() && AreBoundsIntersectTanks(leftBounds).empty()) {
+                        e->GoLeft(g->ElapsedSeconds);
+                    }
+                    break;
+            }
+            Tanks[position.x][position.y] = e;
+        } else {
+            e->Shoot();
+            e->ElapsedRandMove = 0;
+            e->RandMove = rand() % 5;
+            e->RandMoveLength = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8f - 0.5f)));;
+        }
+
+        for (int i = 0; i < e->Bullets.size(); i++) {
+            Bullet *b = e->Bullets[i];
+            sf::FloatRect bounds = b->Sprite.getGlobalBounds();
+
+            bool isNeedToDeleteBullet = false;
+
+            std::vector<Block *> hitBlocks = AreBoundsIntersectBlocks(bounds);
+            if (!hitBlocks.empty()) {
+                for (Block *bb:hitBlocks) {
+                    bb->Hit(ReverseRotation(b->Sprite.getRotation()));
+                }
+                isNeedToDeleteBullet = true;
+            }
+
+            if (isNeedToDeleteBullet) {
+                e->Bullets.erase(e->Bullets.begin() + i);
+            }
+        }
+
+        e->Update(g);
+    }
+
+    int enemiesToSpawnRaw = MAX_ENEMY_TANKS_COUNT - Enemies.size();
+    if (enemiesToSpawnRaw <= 0) return;
+
+    int enemiesToSpawn = enemiesToSpawnRaw > EnemiesToKillCount ? EnemiesToKillCount : enemiesToSpawnRaw;
+    if (enemiesToSpawn <= 0) return;
+
+    int enemiesToSpawnOnSpawnPoints = enemiesToSpawn > EnemySpawnPoints.size()
+                                      ? EnemySpawnPoints.size()
+                                      : enemiesToSpawn;
+
+    int spawnedEnemiesCount = 0;
+    for (int i = 0; i < enemiesToSpawnOnSpawnPoints; i++) {
+        bool isSpawned = false;
+        for (sf::Vector2f sp:EnemySpawnPoints) {
+            sf::FloatRect rect = sf::FloatRect(sp.x - 12, sp.y - 12, 24, 24);
+            auto res = AreBoundsIntersectTanks(rect);
+            if (res.empty()) {
+                Tank *newEnemy = new Tank(sp, enemyTankTexture, bulletTexture);
+                Enemies.push_back(newEnemy);
+
+                auto position = DisplayToBlocksTankPosition(newEnemy->TankSprite.getGlobalBounds());
+                Tanks[position.x][position.y] = newEnemy;
+
+                isSpawned = true;
+                break;
+            }
+        }
+        if (!isSpawned) {
+            break;
+        }
+        spawnedEnemiesCount++;
+    }
+    EnemiesToKillCount -= spawnedEnemiesCount;
 }
 
 
@@ -121,6 +239,73 @@ std::vector<Block *> Level::AreBoundsIntersectBlocks(sf::FloatRect bounds) {
     }
 
     Block *bRightDown = AreBoundsIntersectBlock(bounds, sf::Vector2i(position.x + 1, position.y + 1));
+    if (bRightDown != nullptr) {
+        res.push_back(bRightDown);
+    }
+
+    return res;
+}
+
+
+Tank *Level::AreBoundsIntersectTank(sf::FloatRect bounds, sf::Vector2i tankPosition) {
+    if (tankPosition.x < 0 || tankPosition.y < 0 || tankPosition.x >= LEVEL_WIDTH_IN_BLOCKS ||
+        tankPosition.y >= LEVEL_HEIGHT_IN_BLOCKS || Tanks[tankPosition.x][tankPosition.y] == nullptr) {
+        return nullptr;
+    }
+
+    if (bounds.intersects(Tanks[tankPosition.x][tankPosition.y]->TankSprite.getGlobalBounds())) {
+        return Tanks[tankPosition.x][tankPosition.y];
+    }
+
+    return nullptr;
+}
+
+std::vector<Tank *> Level::AreBoundsIntersectTanks(sf::FloatRect bounds) {
+    sf::Vector2i position = DisplayToBlocksTankPosition(bounds);
+
+    std::vector<Tank *> res = {};
+
+    Tank *b = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x, position.y));
+    if (b != nullptr) {
+        res.push_back(b);
+    }
+
+    Tank *bLeft = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x - 1, position.y));
+    if (bLeft != nullptr) {
+        res.push_back(bLeft);
+    }
+
+    Tank *bRight = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x + 1, position.y));
+    if (bRight != nullptr) {
+        res.push_back(bRight);
+    }
+
+    Tank *bUp = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x, position.y - 1));
+    if (bUp != nullptr) {
+        res.push_back(bUp);
+    }
+
+    Tank *bDown = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x, position.y + 1));
+    if (bDown != nullptr) {
+        res.push_back(bDown);
+    }
+
+    Tank *bLeftUp = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x - 1, position.y - 1));
+    if (bLeftUp != nullptr) {
+        res.push_back(bLeftUp);
+    }
+
+    Tank *bRightUp = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x + 1, position.y - 1));
+    if (bRightUp != nullptr) {
+        res.push_back(bRightUp);
+    }
+
+    Tank *bLeftDown = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x - 1, position.y + 1));
+    if (bLeftDown != nullptr) {
+        res.push_back(bLeftDown);
+    }
+
+    Tank *bRightDown = AreBoundsIntersectTank(bounds, sf::Vector2i(position.x + 1, position.y + 1));
     if (bRightDown != nullptr) {
         res.push_back(bRightDown);
     }

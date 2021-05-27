@@ -12,6 +12,9 @@ public:
     void Update() override;
 
     void UpdateOnEvent(sf::Event) override;
+
+private:
+    sf::Sprite *menuSprite;
 };
 
 class ArcadeState : public GameState {

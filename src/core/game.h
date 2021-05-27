@@ -21,6 +21,8 @@ public:
 
     float ElapsedSeconds;
 
+    sf::Texture *MenuTexture;
+
     sf::Texture *TankTexture;
 
     sf::Texture *BulletTexture;
@@ -28,6 +30,8 @@ public:
     sf::Texture *BricksTexture;
 
     sf::Texture *CementTexture;
+
+    sf::Texture *EnemyTankTexture;
 
 private:
     sf::RenderWindow window;
@@ -37,6 +41,7 @@ private:
     GameState *newState;
 
     bool areArcadeTexturesLoaded;
+    bool areMenuTexturesLoaded;
 };
 
 class GameState {
