@@ -13,7 +13,7 @@ public:
 
     void DrawSprite(sf::Sprite *);
 
-    void RunArcade();
+    void RunArcade(int playersCount);
 
     void RunMenu();
 
@@ -24,6 +24,8 @@ public:
     sf::Texture *MenuTexture;
 
     sf::Texture *TankTexture;
+
+    sf::Texture *TankTwoTexture;
 
     sf::Texture *BulletTexture;
 

@@ -8,6 +8,7 @@ Game::Game() : clock(sf::Clock()),
 
     MenuTexture = new sf::Texture();
     TankTexture = new sf::Texture();
+    TankTwoTexture = new sf::Texture();
 
     BulletTexture = new sf::Texture();
     BricksTexture = new sf::Texture();
@@ -54,10 +55,13 @@ void Game::DrawSprite(sf::Sprite *s) {
     window.draw(*s);
 }
 
-void Game::RunArcade() {
+void Game::RunArcade(int playersCount) {
     if (newState != nullptr) return;
 
     if (!areArcadeTexturesLoaded) {
+        bool isTankTwoTextureLoaded = TankTwoTexture->loadFromFile("src/textures/player_tank2.png");
+        if (!isTankTwoTextureLoaded) return;
+
         bool isBulletTextureLoaded = BulletTexture->loadFromFile("src/textures/bullet.png");
         if (!isBulletTextureLoaded) return;
 
@@ -76,7 +80,7 @@ void Game::RunArcade() {
         areArcadeTexturesLoaded = true;
     }
 
-    newState = new ArcadeState(this);
+    newState = new ArcadeState(this, playersCount);
 }
 
 void Game::RunMenu() {

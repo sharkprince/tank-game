@@ -13,20 +13,34 @@ public:
 
     void UpdateOnEvent(sf::Event) override;
 
+    void GoNextItem();
+
+    void GoPrevItem();
+
 private:
     sf::Sprite *menuSprite;
+    sf::Sprite *menuItemSprite;
+
+    int currentMenuItem;
+
+    constexpr static float ITEM_BASE_POSITION_X = 224.f;
+    constexpr static float ITEM_BASE_POSITION_Y = 190.f;
+    constexpr static float ITEM_STEP_Y = 45.f;
 };
 
 class ArcadeState : public GameState {
 public:
-    ArcadeState(Game *);
+    ArcadeState(Game *, int);
 
     void Update() override;
 
     void UpdateOnEvent(sf::Event) override;
 
 private:
+    int playersCount;
+
     Tank *playerOneTank;
+    Tank *playerTwoTank;
     Level *level;
 };
 
