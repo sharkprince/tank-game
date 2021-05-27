@@ -7,4 +7,10 @@
 Level *createNewLevelOne(sf::Texture *waterTexture, sf::Texture *grassTexture, sf::Texture *cementTexture,
                          sf::Texture *brickTexture);
 
+Level *createNewLevelTwo(sf::Texture *waterTexture, sf::Texture *grassTexture, sf::Texture *cementTexture,
+                         sf::Texture *brickTexture);
+
+Level *createNewLevelThree(sf::Texture *waterTexture, sf::Texture *grassTexture, sf::Texture *cementTexture,
+                         sf::Texture *brickTexture);
+
 #endif

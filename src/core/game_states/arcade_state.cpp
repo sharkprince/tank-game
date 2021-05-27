@@ -39,9 +39,25 @@ ArcadeState::ArcadeState(Game *g, int playersCount) {
         playerTwoLivesCount = -1;
     }
     level = createNewLevelOne(game->WaterTexture, game->GrassTexture, game->CementTexture, game->BricksTexture);
+
+    levelCount = 1;
+    isLevelLoaderDisplaying = true;
+    levelDisplay = new sf::Sprite();
+    levelDisplay->setTexture(*g->LevelOneTexture);
+    levelDisplay->setTextureRect(sf::IntRect(0, 0, 640, 360));
 }
 
 void ArcadeState::Update() {
+    if (isLevelLoaderDisplaying) {
+        elapsedFromGameOver += game->ElapsedSeconds;
+        if (elapsedFromGameOver > 1.5f) {
+            isLevelLoaderDisplaying = false;
+            elapsedFromGameOver = 0;
+        }
+        game->DrawSprite(levelDisplay);
+        return;
+    }
+
     level->Tanks = {};
     for (int i = 0; i < Level::LEVEL_WIDTH_IN_BLOCKS; i++) {
         level->Tanks.emplace_back();
@@ -287,6 +303,37 @@ void ArcadeState::Update() {
                 break;
             }
         }
+    }
+
+    if (level->Enemies.empty() && level->EnemiesToKillCount == 0 && !isLevelLoaderDisplaying) {
+        if (levelCount == 3) {
+            levelCount = 1;
+        } else {
+            levelCount++;
+        }
+        if (playerOneTank != nullptr) {
+            playerOneTank->TankSprite->setPosition(Level::PlayerSpawnPoints[0].x, Level::PlayerSpawnPoints[0].y);
+        }
+        if (playerTwoTank != nullptr) {
+            playerTwoTank->TankSprite->setPosition(Level::PlayerSpawnPoints[1].x, Level::PlayerSpawnPoints[0].y);
+        }
+        switch (levelCount) {
+            case 1:
+                levelDisplay->setTexture(*game->LevelOneTexture);
+                level = createNewLevelOne(game->WaterTexture, game->GrassTexture, game->CementTexture,
+                                          game->BricksTexture);
+                break;
+            case 2:
+                levelDisplay->setTexture(*game->LevelTwoTexture);
+                level = createNewLevelTwo(game->WaterTexture, game->GrassTexture, game->CementTexture,
+                                          game->BricksTexture);
+                break;
+            case 3:
+                levelDisplay->setTexture(*game->LevelThreeTexture);
+                level = createNewLevelThree(game->WaterTexture, game->GrassTexture, game->CementTexture, game->BricksTexture);
+                break;
+        }
+        isLevelLoaderDisplaying = true;
     }
 }
 

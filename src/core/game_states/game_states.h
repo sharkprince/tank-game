@@ -39,6 +39,10 @@ public:
 private:
     float elapsedFromGameOver;
 
+    int levelCount;
+    bool isLevelLoaderDisplaying;
+    sf::Sprite *levelDisplay;
+
     int playerOneLivesCount;
     std::vector<sf::Sprite *> playerOneLiveSprites;
 

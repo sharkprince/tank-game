@@ -41,13 +41,6 @@ Level::Level(std::vector<std::vector<Block *>> blocks, int enemiesCount) {
 }
 
 void Level::Update(Game *g) {
-    for (const std::vector<Block *> &b:blocks) {
-        for (Block *bb: b) {
-            if (bb != nullptr) {
-                bb->Update(g);
-            }
-        }
-    }
 
     for (int i = 0; i < Enemies.size(); i++) {
         Tank *e = Enemies[i];
@@ -116,6 +109,14 @@ void Level::Update(Game *g) {
         }
 
         e->Update(g);
+    }
+
+    for (const std::vector<Block *> &b:blocks) {
+        for (Block *bb: b) {
+            if (bb != nullptr) {
+                bb->Update(g);
+            }
+        }
     }
 
     int enemiesToSpawnRaw = MAX_ENEMY_TANKS_COUNT - Enemies.size();
