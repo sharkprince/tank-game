@@ -37,12 +37,29 @@ public:
     void UpdateOnEvent(sf::Event) override;
 
 private:
+    float elapsedFromGameOver;
+
     int playerOneLivesCount;
+    std::vector<sf::Sprite *> playerOneLiveSprites;
+
     int playerTwoLivesCount;
+    std::vector<sf::Sprite *> playerTwoLiveSprites;
 
     Tank *playerOneTank;
     Tank *playerTwoTank;
     Level *level;
+};
+
+class GameOverState : public GameState {
+public:
+    GameOverState(Game*);
+
+    void Update() override;
+
+    void UpdateOnEvent(sf::Event) override;
+private:
+    sf::Sprite *gameOverSprite;
+
 };
 
 #endif //TANK_GAME_GAME_STATES_H

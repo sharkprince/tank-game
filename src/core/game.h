@@ -15,6 +15,8 @@ public:
 
     void RunArcade(int playersCount);
 
+    void RunGameOver();
+
     void RunMenu();
 
     void Close();

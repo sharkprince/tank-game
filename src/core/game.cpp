@@ -127,6 +127,12 @@ void Game::RunMenu() {
     newState = new MenuState(this);
 }
 
+void Game::RunGameOver() {
+    if (newState != nullptr) return;
+
+    newState = new GameOverState(this);
+}
+
 void Game::Close() {
     window.close();
 }

@@ -6,12 +6,34 @@
 ArcadeState::ArcadeState(Game *g, int playersCount) {
     this->game = g;
 
+    elapsedFromGameOver = 0;
+
     playerOneTank = new Tank(Level::PlayerSpawnPoints[0], game->TankTexture, g->BulletTexture, g->ExplosionTexture);
     playerOneLivesCount = 3;
+    playerOneLiveSprites = {
+            new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+            new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+            new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+    };
+    playerOneLiveSprites[0]->setPosition(540.f, 171.5f);
+    playerOneLiveSprites[1]->setPosition(557.f, 171.5f);
+    playerOneLiveSprites[2]->setPosition(574.f, 171.5f);
+
+
+    playerTwoLiveSprites = {};
+
     if (playersCount == 2) {
         playerTwoTank = new Tank(Level::PlayerSpawnPoints[1], game->TankTwoTexture, g->BulletTexture,
                                  g->ExplosionTexture);
         playerTwoLivesCount = 3;
+        playerTwoLiveSprites = {
+                new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+                new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+                new sf::Sprite(*g->HealthTexture, sf::IntRect(0, 0, 17, 17)),
+        };
+        playerTwoLiveSprites[0]->setPosition(46.f, 171.5f);
+        playerTwoLiveSprites[1]->setPosition(63.f, 171.5f);
+        playerTwoLiveSprites[2]->setPosition(80.f, 171.5f);
     } else {
         playerTwoTank = nullptr;
         playerTwoLivesCount = -1;
@@ -195,6 +217,14 @@ void ArcadeState::Update() {
 
     level->Update(game);
 
+    for (auto s: playerOneLiveSprites) {
+        game->DrawSprite(s);
+    }
+
+    for (auto s: playerTwoLiveSprites) {
+        game->DrawSprite(s);
+    }
+
     for (auto e: level->Enemies) {
         for (int i = 0; i < e->Bullets.size(); ++i) {
             sf::FloatRect bounds = e->Bullets[i]->Sprite.getGlobalBounds();
@@ -202,6 +232,9 @@ void ArcadeState::Update() {
                 if (bounds.intersects(playerOneTank->TankSprite->getGlobalBounds())) {
                     if (playerOneTank->Destroy()) {
                         playerOneLivesCount--;
+                        if (!playerOneLiveSprites.empty()) {
+                            playerOneLiveSprites.pop_back();
+                        }
                     }
                 }
             }
@@ -209,9 +242,19 @@ void ArcadeState::Update() {
                 if (bounds.intersects(playerTwoTank->TankSprite->getGlobalBounds())) {
                     if (playerTwoTank->Destroy()) {
                         playerTwoLivesCount--;
+                        if (!playerTwoLiveSprites.empty()) {
+                            playerTwoLiveSprites.pop_back();
+                        }
                     }
                 }
             }
+        }
+    }
+
+    if (playerTwoLivesCount <= -1 && playerOneLivesCount <= -1) {
+        elapsedFromGameOver += game->ElapsedSeconds;
+        if (elapsedFromGameOver >= 1) {
+            game->RunGameOver();
         }
     }
 
