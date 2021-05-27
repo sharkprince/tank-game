@@ -30,9 +30,10 @@ public:
 
     void Shoot();
 
-    void Destroy();
+    bool Destroy();
 
     bool GetIsDestroyed();
+
     float GetExplosionDuration();
 
     void Update(Game *);

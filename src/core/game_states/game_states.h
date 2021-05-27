@@ -37,7 +37,8 @@ public:
     void UpdateOnEvent(sf::Event) override;
 
 private:
-    int playersCount;
+    int playerOneLivesCount;
+    int playerTwoLivesCount;
 
     Tank *playerOneTank;
     Tank *playerTwoTank;

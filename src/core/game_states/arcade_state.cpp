@@ -5,14 +5,16 @@
 
 ArcadeState::ArcadeState(Game *g, int playersCount) {
     this->game = g;
-    this->playersCount = playersCount;
 
     playerOneTank = new Tank(Level::PlayerSpawnPoints[0], game->TankTexture, g->BulletTexture, g->ExplosionTexture);
+    playerOneLivesCount = 3;
     if (playersCount == 2) {
         playerTwoTank = new Tank(Level::PlayerSpawnPoints[1], game->TankTwoTexture, g->BulletTexture,
                                  g->ExplosionTexture);
+        playerTwoLivesCount = 3;
     } else {
         playerTwoTank = nullptr;
+        playerTwoLivesCount = -1;
     }
     level = createNewLevelOne(game->WaterTexture, game->GrassTexture, game->CementTexture, game->BricksTexture);
 }
@@ -198,19 +200,23 @@ void ArcadeState::Update() {
             sf::FloatRect bounds = e->Bullets[i]->Sprite.getGlobalBounds();
             if (playerOneTank != nullptr) {
                 if (bounds.intersects(playerOneTank->TankSprite->getGlobalBounds())) {
-                    playerOneTank->Destroy();
+                    if (playerOneTank->Destroy()) {
+                        playerOneLivesCount--;
+                    }
                 }
             }
             if (playerTwoTank != nullptr) {
                 if (bounds.intersects(playerTwoTank->TankSprite->getGlobalBounds())) {
-                    playerTwoTank->Destroy();
+                    if (playerTwoTank->Destroy()) {
+                        playerTwoLivesCount--;
+                    }
                 }
             }
         }
     }
 
 
-    if (playerOneTank == nullptr) {
+    if (playerOneTank == nullptr && playerOneLivesCount > -1) {
         for (sf::Vector2f sp:Level::PlayerSpawnPoints) {
             sf::FloatRect rect = sf::FloatRect(sp.x - 12, sp.y - 12, 24, 24);
             auto res = level->AreBoundsIntersectTanks(rect);
@@ -225,7 +231,7 @@ void ArcadeState::Update() {
         }
     }
 
-    if (playerTwoTank == nullptr && playersCount == 2) {
+    if (playerTwoTank == nullptr && playerTwoLivesCount > -1) {
         for (sf::Vector2f sp:Level::PlayerSpawnPoints) {
             sf::FloatRect rect = sf::FloatRect(sp.x - 12, sp.y - 12, 24, 24);
             auto res = level->AreBoundsIntersectTanks(rect);

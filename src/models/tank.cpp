@@ -126,11 +126,14 @@ void Tank::Shoot() {
     Bullets.push_back(newBullet);
 }
 
-void Tank::Destroy() {
+bool Tank::Destroy() {
+    if (isDestroyed) return false;
+
     isDestroyed = true;
     auto position = TankSprite->getPosition();
     explosionSprite->setPosition(position.x, position.y);
     explosionAnimator = new Animator(0.3f, explosionSprite);
+    return true;
 }
 
 bool Tank::GetIsDestroyed() {
